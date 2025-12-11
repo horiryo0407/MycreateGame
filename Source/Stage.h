@@ -27,6 +27,8 @@ public:
 	int CheckDown(VECTOR2 pos);
 
 	int CheckUp(VECTOR2 pos);
+
+	int GetMapWidth() const { return map[0].size() * imageSize.x; }
 private:
 	float scrollX; // â°ÉXÉNÉçÅ[Éãó 
 

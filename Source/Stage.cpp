@@ -60,10 +60,10 @@ void Stage::Draw()
 		for (int x = 0; x < map[y].size(); x++) {
 			int c = map[y][x];
 			if (c == 1) {
-				DrawRectGraph(x * w - scrollX, y * h, 3 * w, 1 * h, w, h, hImage, TRUE);
+				DrawRectGraph(x * w , y * h, 3 * w, 1 * h, w, h, hImage, TRUE);
 			}
 			else if (c == 2) {
-				DrawRectGraph(x * w - scrollX, y * h, 0 * w, 1 * h, w, h, hImage, TRUE);
+				DrawRectGraph(x * w, y * h, 0 * w, 1 * h, w, h, hImage, TRUE);
 			}
 		}
 	}
