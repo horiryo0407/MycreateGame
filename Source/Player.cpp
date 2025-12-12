@@ -4,41 +4,41 @@
 #include "../ImGui/imgui.h"
 #include "CsvReader.h"
 
-//static const float Gravity = 0.05f;
-//static const float JumpHeight = 64.0f * 2.0f;
-//static const float JumpV0 = -sqrtf(2.0f * Gravity * JumpHeight);
-
 Player::Player() : Player(VECTOR2(100, 200))
 {
 }
 
 Player::Player(VECTOR2 pos)
 {
-	// パラメーターを読む
-	CsvReader* csv = new CsvReader("data/playerParam.csv");
-	for (int i = 0; i < csv->GetLines(); i++) {
-		std::string tag = csv->GetString(i, 0);
-		if (tag == "Gravity") {
-			Gravity = csv->GetFloat(i, 1);
-		}
-		else if (tag == "JumpHeight") {
-			JumpHeight = csv->GetFloat(i, 1);
-		}
-		else if (tag == "MoveSpeed") {
-			moveSpeed = csv->GetFloat(i, 1);
-		}
-	}
-	JumpV0 = -sqrtf(2.0f * Gravity * JumpHeight);
+    // パラメーター読込
+    CsvReader* csv = new CsvReader("data/playerParam.csv");
+    for (int i = 0; i < csv->GetLines(); i++) {
+        std::string tag = csv->GetString(i, 0);
+        if (tag == "Gravity") {
+            Gravity = csv->GetFloat(i, 1);
+        }
+        else if (tag == "JumpHeight") {
+            JumpHeight = csv->GetFloat(i, 1);
+        }
+        else if (tag == "MoveSpeed") {
+            moveSpeed = csv->GetFloat(i, 1);
+        }
+    }
+    JumpV0 = -sqrtf(2.0f * Gravity * JumpHeight);
 
-	hImage = LoadGraph("data/image/tamadot.png");
-	assert(hImage > 0);
+    hImage = LoadGraph("data/image/tamadot.png");
+    assert(hImage > 0);
 
-	imageSize = VECTOR2(64, 64);
-	anim = 0;
-	animY = 3;
+    imageSize = VECTOR2(64, 64);
+    anim = 0;
+    animY = 3;
 
-	position = pos;
-	velocityY = 0.0f;
+    position = pos;
+    velocityY = 0.0f;
+
+    // ★ 追加：HP初期化
+    maxHp = 100;
+    hp = 100;
 }
 
 Player::~Player()
@@ -47,88 +47,108 @@ Player::~Player()
 
 void Player::Update()
 {
-	Stage* st = FindGameObject<Stage>();
-	if (CheckHitKey(KEY_INPUT_D)) {
-		position.x += moveSpeed;
-		int push = st->CheckRight(position + VECTOR2(24, -31)); // 右上
-		position.x -= push;
-		push = st->CheckRight(position + VECTOR2(24, 31)); // 右下
-		position.x -= push;
-	}
-	if (CheckHitKey(KEY_INPUT_A)) {
-		position.x -= moveSpeed;
-		int push = st->CheckLeft(position + VECTOR2(-24, -31)); // 左上
-		position.x += push;
-		push = st->CheckLeft(position + VECTOR2(-24, 31)); // 左下
-		position.x += push;
-	}
-	if (onGround) {
-		if (CheckHitKey(KEY_INPUT_SPACE)) {
-			if (prevPushed == false) {
-				velocityY = JumpV0;
-			}
-			prevPushed = true;
-		}
-		else {
-			prevPushed = false;
-		}
-	}
-	{
-		position.y += velocityY;
-		velocityY += Gravity;
-		onGround = false;
-		if (velocityY < 0.0f) {
-			int push = st->CheckUp(position + VECTOR2(-24, -31)); // 左下
-			if (push > 0) {
-				velocityY = 0.0f;
-				position.y += push;
-			}
-			push = st->CheckUp(position + VECTOR2(24, -31)); // 右下
-			if (push > 0) {
-				velocityY = 0.0f;
-				position.y += push;
-			}
-		}
-		else {
-			int push = st->CheckDown(position + VECTOR2(-24, 31 + 1)); // 左下
-			if (push > 0) {
-				velocityY = 0.0f;
-				onGround = true;
-				position.y -= push - 1;
-			}
-			push = st->CheckDown(position + VECTOR2(24, 31 + 1)); // 右下
-			if (push > 0) {
-				velocityY = 0.0f;
-				onGround = true;
-				position.y -= push - 1;
-			}
-		}
-	}
-	//// プレイヤーの表示位置が、400よりも右だったら、スクロールする
-	//if (st != nullptr) {
-	//	float drawX = position.x - st->ScrollX(); // これが表示座標
-	//	static const int RightLimit = 400;
-	//	static const int LeftLimit = 24;
-	//	if (drawX > RightLimit) {
-	//		st->SetScrollX(position.x - RightLimit);
-	//	}
-	//	else if (drawX < LeftLimit) {
-	//		position.x = LeftLimit + st->ScrollX();
-	//	}
-	//}
+    Stage* st = FindGameObject<Stage>();
 
+    // --- 横移動 ---
+    if (CheckHitKey(KEY_INPUT_D)) {
+        position.x += moveSpeed;
+        int push = st->CheckRight(position + VECTOR2(24, -31));
+        position.x -= push;
+        push = st->CheckRight(position + VECTOR2(24, 31));
+        position.x -= push;
+    }
+    if (CheckHitKey(KEY_INPUT_A)) {
+        position.x -= moveSpeed;
+        int push = st->CheckLeft(position + VECTOR2(-24, -31));
+        position.x += push;
+        push = st->CheckLeft(position + VECTOR2(-24, 31));
+        position.x += push;
+    }
 
-	ImGui::Begin("Player");
-	ImGui::Checkbox("onGround", &onGround);
-	ImGui::InputFloat("positionY", &position.y);
-	ImGui::End();
+    // --- ジャンプ ---
+    if (onGround) {
+        if (CheckHitKey(KEY_INPUT_SPACE)) {
+            if (!prevPushed) {
+                velocityY = JumpV0;
+            }
+            prevPushed = true;
+        }
+        else {
+            prevPushed = false;
+        }
+    }
+
+    // --- 重力 ---
+    position.y += velocityY;
+    velocityY += Gravity;
+    onGround = false;
+
+    if (velocityY < 0.0f) {
+        int push = st->CheckUp(position + VECTOR2(-24, -31));
+        if (push > 0) {
+            velocityY = 0.0f;
+            position.y += push;
+        }
+        push = st->CheckUp(position + VECTOR2(24, -31));
+        if (push > 0) {
+            velocityY = 0.0f;
+            position.y += push;
+        }
+    }
+    else {
+        int push = st->CheckDown(position + VECTOR2(-24, 32));
+        if (push > 0) {
+            velocityY = 0.0f;
+            onGround = true;
+            position.y -= push - 1;
+        }
+        push = st->CheckDown(position + VECTOR2(24, 32));
+        if (push > 0) {
+            velocityY = 0.0f;
+            onGround = true;
+            position.y -= push - 1;
+        }
+    }
+
+    //ImGui::Begin("Player");
+    //ImGui::Checkbox("onGround", &onGround);
+    //ImGui::InputFloat("positionY", &position.y);
+    //ImGui::End();
 }
 
 void Player::Draw()
 {
-	Object2D::Draw();
-	Stage* st = FindGameObject<Stage>();
-	float x = position.x;
-	DrawBox(x - 24, position.y - 32, x + 24, position.y + 32,
-		GetColor(255, 0, 0), FALSE);
+    Object2D::Draw();
+
+    // 本体描画（スクロールは外で行う前提）
+    DrawBox(position.x - 24, position.y - 32,
+        position.x + 24, position.y + 32,
+        GetColor(255, 0, 0), FALSE);
+    DrawUI();
+}
+
+// ★ 新規追加：HPバー描画
+void Player::DrawUI()
+{
+    int x = 20;
+    int y = 20;
+    int w = 200;
+    int h = 20;
+
+    float rate = (float)hp / maxHp;
+    int curW = (int)(w * rate);
+
+    // 枠
+    DrawBox(x - 1, y - 1, x + w + 1, y + h + 1,
+        GetColor(0, 0, 0), FALSE);
+
+    // 中身
+    DrawBox(x, y, x + curW, y + h,
+        GetColor(255, 0, 0), TRUE);
+
+    // 数字
+    DrawFormatString(x, y + 24, GetColor(255, 255, 255),
+        "%d / %d", hp, maxHp);
+
+   
 }

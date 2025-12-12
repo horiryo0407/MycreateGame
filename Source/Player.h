@@ -8,6 +8,7 @@ public:
 	~Player();
 	void Update() override;
 	void Draw() override;
+	void DrawUI();
 private:
 	float velocityY;
 	bool onGround;
@@ -17,4 +18,8 @@ private:
 	float JumpHeight;
 	float JumpV0;
 	float moveSpeed;
+
+	int hp;
+	int maxHp;
+
 };
