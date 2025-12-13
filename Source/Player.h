@@ -9,10 +9,12 @@ public:
 	void Update() override;
 	void Draw() override;
 	void DrawUI();
+	void Damage(int value);
 private:
 	float velocityY;
 	bool onGround;
 	bool prevPushed;
+	bool prevAttack;
 
 	float Gravity;
 	float JumpHeight;
@@ -21,5 +23,7 @@ private:
 
 	int hp;
 	int maxHp;
+	int damageTimer;
+	int attackTimer;
 
 };

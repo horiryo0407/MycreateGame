@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <vector>
 #include "Player.h"
+#include "Enemy.h"
 #include "CsvReader.h"
 
 //std::vector<std::vector<int>> map = {
@@ -38,10 +39,17 @@ Stage::Stage()
 	for (int y = 0; y < map.size(); y++) {
 		for (int x = 0; x < map[y].size(); x++) {
 			int c = map[y][x];
-			if (c == 9) {
+			if (c == 9) 
+			{
 				int px = x * imageSize.x + imageSize.x / 2.0f;
 				int py = y * imageSize.y + imageSize.y / 2.0f;
 				new Player(VECTOR2(px, py));
+			}
+			if (c == 7)  
+			{
+				int ex = x * imageSize.x + imageSize.x / 2.0f;
+				int ey = y * imageSize.y + imageSize.y / 2.0f;
+				new Enemy(VECTOR2(ex, ey));
 			}
 		}
 	}
@@ -60,10 +68,10 @@ void Stage::Draw()
 		for (int x = 0; x < map[y].size(); x++) {
 			int c = map[y][x];
 			if (c == 1) {
-				DrawRectGraph(x * w , y * h, 3 * w, 1 * h, w, h, hImage, TRUE);
+				DrawRectGraph(x * w , y * h, 5 * w, 1 * h, w, h, hImage, TRUE);
 			}
 			else if (c == 2) {
-				DrawRectGraph(x * w, y * h, 0 * w, 1 * h, w, h, hImage, TRUE);
+				DrawRectGraph(x * w, y * h, 4 * w, 0 * h, w, h, hImage, TRUE);
 			}
 		}
 	}
@@ -112,6 +120,31 @@ int Stage::CheckUp(VECTOR2 pos)
 	int dy = pos.y - y * imageSize.y; // チップの中の座標
 	return imageSize.y - dy;
 }
+
+bool Stage::IsBlock(int px, int py)
+{
+	int tx = px / imageSize.x;
+	int ty = py / imageSize.y;
+
+	if (ty < 0 || ty >= map.size()) return false;
+	if (tx < 0 || tx >= map[ty].size()) return false;
+
+	int c = map[ty][tx];
+	return (c == 1 || c == 2);
+}
+
+int Stage::GetBlock(int x, int y)
+{
+	int tx = x / imageSize.x;
+	int ty = y / imageSize.y;
+
+	// マップ外は壁扱い
+	if (ty < 0 || ty >= map.size()) return 1;
+	if (tx < 0 || tx >= map[ty].size()) return 1;
+
+	return map[ty][tx];
+}
+
 
 bool Stage::IsWall(VECTOR2 pos)
 {

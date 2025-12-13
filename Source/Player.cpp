@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <assert.h>
 #include "Stage.h"
+#include "Enemy.h"
 #include "../ImGui/imgui.h"
 #include "CsvReader.h"
 
@@ -35,10 +36,11 @@ Player::Player(VECTOR2 pos)
 
     position = pos;
     velocityY = 0.0f;
-
-    // ★ 追加：HP初期化
+    attackTimer = 0;
     maxHp = 100;
     hp = 100;
+
+    prevAttack = false;
 }
 
 Player::~Player()
@@ -110,6 +112,54 @@ void Player::Update()
         }
     }
 
+    if (damageTimer > 0)
+    {
+        damageTimer--;
+    }
+
+    bool nowAttack = CheckHitKey(KEY_INPUT_H);
+
+    if (nowAttack && !prevAttack && attackTimer == 0)
+    {
+        Enemy* enemy = FindGameObject<Enemy>();
+        if (enemy)
+        {
+            VECTOR2 epos = enemy->GetPosition();
+
+            if (fabs(position.x - epos.x) < 60 &&
+                fabs(position.y - epos.y) < 60)
+            {
+                enemy->Damage(5);
+                attackTimer = 30;
+            }
+        }
+    }
+
+    prevAttack = nowAttack;
+
+    if (attackTimer > 0)
+    {
+        attackTimer--;
+    }
+
+    Enemy* enemy = FindGameObject<Enemy>();
+    if (enemy && !enemy->isDead)
+    {
+        VECTOR2 epos = enemy->GetPosition();
+
+        float dx = position.x - epos.x;
+        float dy = position.y - epos.y;
+
+        if (fabs(dx) < 48 && fabs(dy) < 40)
+        {
+            float push = 48 - fabs(dx);
+            if (dx > 0)
+                position.x += push;
+            else
+                position.x -= push;
+        }
+    }
+
     //ImGui::Begin("Player");
     //ImGui::Checkbox("onGround", &onGround);
     //ImGui::InputFloat("positionY", &position.y);
@@ -127,7 +177,7 @@ void Player::Draw()
     DrawUI();
 }
 
-// ★ 新規追加：HPバー描画
+//HPバー描画
 void Player::DrawUI()
 {
     int x = 20;
@@ -151,4 +201,11 @@ void Player::DrawUI()
         "%d / %d", hp, maxHp);
 
    
+}
+
+void Player::Damage(int value)
+{
+
+    hp -= value;
+    damageTimer = 60;
 }

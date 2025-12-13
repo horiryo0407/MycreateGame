@@ -29,6 +29,11 @@ public:
 	int CheckUp(VECTOR2 pos);
 
 	int GetMapWidth() const { return map[0].size() * imageSize.x; }
+
+	bool IsBlock(int px, int py);
+
+	int GetBlock(int x, int y);
+
 private:
 	float scrollX; // â°ÉXÉNÉçÅ[Éãó 
 
