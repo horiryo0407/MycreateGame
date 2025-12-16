@@ -10,17 +10,14 @@ Enemy::Enemy() : Enemy(VECTOR2(300, 200))
 
 Enemy::Enemy(VECTOR2 pos)
 {
-
     if (Gravity <= 0) Gravity = 0.6f;
     if (JumpHeight <= 0) JumpHeight = 64;
     if (moveSpeed <= 0) moveSpeed = 2;
-   
+
     hImage = LoadGraph("data/image/tamadot.png");
     JumpV0 = -sqrtf(2.0f * Gravity * JumpHeight);
 
     imageSize = VECTOR2(64, 64);
-    anim = 0;
-    animY = 1;
 
     position = pos;
 
@@ -30,7 +27,6 @@ Enemy::Enemy(VECTOR2 pos)
     damageTimer = 0;
     attackTimer = 0;
     jumpTimer = 60;
-
 
     velocityY = 0.0f;
     onGround = false;
@@ -42,28 +38,37 @@ Enemy::~Enemy()
 {
 }
 
-
 void Enemy::Update()
 {
     Stage* st = FindGameObject<Stage>();
     Player* pl = FindGameObject<Player>();
+    if (!st) return;
 
     if (hp <= 0)
     {
         Kill();
         return;
     }
-    // ===== 追尾（向き決定だけ）=====
+
+    // ===== プレイヤー方向を見る =====
     if (pl)
     {
-        if (pl->GetPosition().x > position.x)
-            dir = 1;
-        else
-            dir = -1;
+        dir = (pl->GetPosition().x > position.x) ? 1 : -1;
     }
 
     // ===== 横移動 =====
     position.x += moveSpeed * dir;
+
+    // ===== ステージ端で止める =====
+    const int HALF = 32;
+
+    int leftLimit = HALF;
+    int rightLimit = st->GetMapWidth() - HALF;
+
+    if (position.x < leftLimit)
+        position.x = leftLimit;
+    else if (position.x > rightLimit)
+        position.x = rightLimit;
 
     // ===== ランダムジャンプ =====
     if (jumpTimer > 0)
@@ -76,7 +81,8 @@ void Enemy::Update()
         jumpTimer = 60 + GetRand(120);
     }
 
-    int frontX = position.x + dir * 32;
+    // ===== 壁前ジャンプ =====
+    int frontX = position.x + dir * HALF;
     int frontY = position.y;
 
     bool frontWall = st->IsBlock(frontX, frontY);
@@ -100,15 +106,11 @@ void Enemy::Update()
         position.y = (int(position.y / 64) * 64) + 32;
     }
 
-    // ===== ⑦ タイマー =====
+    // ===== タイマー =====
     if (damageTimer > 0) damageTimer--;
     if (attackTimer > 0) attackTimer--;
 
-    // ===== 攻撃クールタイム =====
-    if (attackTimer > 0)
-        attackTimer--;
-
-    // ===== プレイヤー攻撃 =====
+    // ===== 攻撃 =====
     if (attackTimer == 0 && pl)
     {
         VECTOR2 p = pl->GetPosition();
@@ -119,22 +121,14 @@ void Enemy::Update()
             attackTimer = 60;
         }
     }
-
-    if (damageTimer > 0)
-    {
-        damageTimer = damageTimer;
-        damageTimer = 0;
-    }
 }
-
-
 
 void Enemy::Draw()
 {
     if (isDead) return;
+
     Object2D::Draw();
 
-    // 本体
     DrawBox(position.x - 24, position.y - 32,
         position.x + 24, position.y + 32,
         GetColor(0, 0, 255), FALSE);
@@ -147,25 +141,21 @@ void Enemy::DrawUI()
     int w = 200;
     int h = 20;
 
-    int x = 1280 - w - 20; 
+    int x = 1280 - w - 20;
     int y = 20;
 
     float rate = (float)hp / maxHp;
     int curW = (int)(w * rate);
 
-    // 枠
     DrawBox(x - 1, y - 1, x + w + 1, y + h + 1,
         GetColor(0, 0, 0), FALSE);
 
-    // 中身
     DrawBox(x, y, x + curW, y + h,
         GetColor(255, 0, 0), TRUE);
 
-    // 数値
     DrawFormatString(x, y + 24, GetColor(255, 255, 255),
         "ENEMY %d / %d", hp, maxHp);
 }
-
 
 void Enemy::Damage(int value)
 {

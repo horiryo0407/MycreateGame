@@ -41,6 +41,9 @@ Player::Player(VECTOR2 pos)
     hp = 100;
 
     prevAttack = false;
+    prevPushed = false;
+    onGround = false;
+    damageTimer = 0;
 }
 
 Player::~Player()
@@ -50,6 +53,7 @@ Player::~Player()
 void Player::Update()
 {
     Stage* st = FindGameObject<Stage>();
+    if (!st) return;
 
     // --- 横移動 ---
     if (CheckHitKey(KEY_INPUT_D)) {
@@ -66,6 +70,16 @@ void Player::Update()
         push = st->CheckLeft(position + VECTOR2(-24, 31));
         position.x += push;
     }
+
+    // ===== ステージ端制限 =====
+    const int HALF = 24; // Player半分幅（DrawBox基準）
+    int leftLimit = HALF;
+    int rightLimit = st->GetMapWidth() - HALF;
+
+    if (position.x < leftLimit)
+        position.x = leftLimit;
+    else if (position.x > rightLimit)
+        position.x = rightLimit;
 
     // --- ジャンプ ---
     if (onGround) {
@@ -112,20 +126,20 @@ void Player::Update()
         }
     }
 
-    if (damageTimer > 0)
-    {
+    // --- ダメージ無敵タイマー ---
+    if (damageTimer > 0) {
         damageTimer--;
     }
 
+    // --- 攻撃 ---
     bool nowAttack = CheckHitKey(KEY_INPUT_H);
 
     if (nowAttack && !prevAttack && attackTimer == 0)
     {
         Enemy* enemy = FindGameObject<Enemy>();
-        if (enemy)
+        if (enemy && !enemy->isDead)
         {
             VECTOR2 epos = enemy->GetPosition();
-
             if (fabs(position.x - epos.x) < 60 &&
                 fabs(position.y - epos.y) < 60)
             {
@@ -134,19 +148,17 @@ void Player::Update()
             }
         }
     }
-
     prevAttack = nowAttack;
 
-    if (attackTimer > 0)
-    {
+    if (attackTimer > 0) {
         attackTimer--;
     }
 
+    // --- Enemy 押し出し ---
     Enemy* enemy = FindGameObject<Enemy>();
     if (enemy && !enemy->isDead)
     {
         VECTOR2 epos = enemy->GetPosition();
-
         float dx = position.x - epos.x;
         float dy = position.y - epos.y;
 
@@ -157,27 +169,35 @@ void Player::Update()
                 position.x += push;
             else
                 position.x -= push;
+
+            // 押し出し後も端制限
+            if (position.x < leftLimit)
+                position.x = leftLimit;
+            else if (position.x > rightLimit)
+                position.x = rightLimit;
         }
     }
 
-    //ImGui::Begin("Player");
-    //ImGui::Checkbox("onGround", &onGround);
-    //ImGui::InputFloat("positionY", &position.y);
-    //ImGui::End();
+    // ImGui デバッグ（必要なら）
+    // ImGui::Begin("Player");
+    // ImGui::Checkbox("onGround", &onGround);
+    // ImGui::InputFloat("positionY", &position.y);
+    // ImGui::End();
 }
 
 void Player::Draw()
 {
     Object2D::Draw();
 
-    // 本体描画（スクロールは外で行う前提）
+    // 本体
     DrawBox(position.x - 24, position.y - 32,
         position.x + 24, position.y + 32,
         GetColor(255, 0, 0), FALSE);
+
     DrawUI();
 }
 
-//HPバー描画
+// HPバー描画
 void Player::DrawUI()
 {
     int x = 20;
@@ -188,24 +208,18 @@ void Player::DrawUI()
     float rate = (float)hp / maxHp;
     int curW = (int)(w * rate);
 
-    // 枠
     DrawBox(x - 1, y - 1, x + w + 1, y + h + 1,
         GetColor(0, 0, 0), FALSE);
 
-    // 中身
     DrawBox(x, y, x + curW, y + h,
         GetColor(255, 0, 0), TRUE);
 
-    // 数字
     DrawFormatString(x, y + 24, GetColor(255, 255, 255),
         "%d / %d", hp, maxHp);
-
-   
 }
 
 void Player::Damage(int value)
 {
-
     hp -= value;
     damageTimer = 60;
 }
