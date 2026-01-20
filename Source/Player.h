@@ -25,5 +25,8 @@ private:
 	int maxHp;
 	int damageTimer;
 	int attackTimer;
+	int seAttack;
+	int seHit;
+
 
 };

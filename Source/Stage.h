@@ -39,5 +39,8 @@ private:
 
 	bool IsWall(VECTOR2 pos);
 
+	int hBgImage;
+
+
 	std::vector<std::vector<int>> map;
 };

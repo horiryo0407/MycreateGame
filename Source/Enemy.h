@@ -32,4 +32,8 @@ private:
 
     float moveSpeed;
     int dir;
+
+    
+    int seDie;
+
 };

@@ -44,6 +44,9 @@ Player::Player(VECTOR2 pos)
     prevPushed = false;
     onGround = false;
     damageTimer = 0;
+
+    seAttack = LoadSoundMem("Sound/キャンセル3.mp3");
+    seHit = LoadSoundMem("Sound/決定ボタンを押す15.mp3");
 }
 
 Player::~Player()
@@ -136,6 +139,8 @@ void Player::Update()
 
     if (nowAttack && !prevAttack && attackTimer == 0)
     {
+        PlaySoundMem(seAttack, DX_PLAYTYPE_BACK);
+
         Enemy* enemy = FindGameObject<Enemy>();
         if (enemy && !enemy->isDead)
         {
@@ -144,10 +149,12 @@ void Player::Update()
                 fabs(position.y - epos.y) < 60)
             {
                 enemy->Damage(5);
+                PlaySoundMem(seHit, DX_PLAYTYPE_BACK);
                 attackTimer = 30;
             }
         }
     }
+
     prevAttack = nowAttack;
 
     if (attackTimer > 0) {
