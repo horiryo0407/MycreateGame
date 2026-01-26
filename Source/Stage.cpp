@@ -54,8 +54,8 @@ Stage::Stage()
 		}
 	}
 
-	hBgImage = LoadGraph("data/image/Background.png");
-	assert(hBgImage > 0);
+	//hBgImage = LoadGraph("data/image/Background.png");
+	//assert(hBgImage > 0);
 
 }
 
@@ -65,7 +65,7 @@ Stage::~Stage()
 
 void Stage::Draw()
 {
-	DrawGraph(0, 0, hBgImage, TRUE);
+	//DrawGraph(0, 0, hBgImage, TRUE);
 	int w = imageSize.x;
 	int h = imageSize.y;
 
@@ -73,7 +73,7 @@ void Stage::Draw()
 		for (int x = 0; x < map[y].size(); x++) {
 			int c = map[y][x];
 			if (c == 1) {
-				DrawRectGraph(x * w , y * h, 4 * w, 0 * h, w, h, hImage, TRUE);
+				DrawRectGraph(x * w , y * h, 5 * w, 1 * h, w, h, hImage, TRUE);
 			}
 			else if (c == 2) {
 				DrawRectGraph(x * w, y * h, 5 * w, 0 * h, w, h, hImage, TRUE);

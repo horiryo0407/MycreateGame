@@ -37,16 +37,17 @@ Player::Player(VECTOR2 pos)
     position = pos;
     velocityY = 0.0f;
     attackTimer = 0;
-    maxHp = 100;
-    hp = 100;
+    maxHp = 10;
+    hp = 10;
 
     prevAttack = false;
     prevPushed = false;
     onGround = false;
     damageTimer = 0;
 
-    seAttack = LoadSoundMem("Sound/キャンセル3.mp3");
-    seHit = LoadSoundMem("Sound/決定ボタンを押す15.mp3");
+    isDead_ = false;
+   /* seAttack = LoadSoundMem("Sound/キャンセル3.mp3");
+    seHit = LoadSoundMem("Sound/決定ボタンを押す15.mp3");*/
 }
 
 Player::~Player()
@@ -55,6 +56,11 @@ Player::~Player()
 
 void Player::Update()
 {
+    if (hp <= 0)
+    {
+        isDead_ = true;
+        return;
+    }
     Stage* st = FindGameObject<Stage>();
     if (!st) return;
 
@@ -142,7 +148,7 @@ void Player::Update()
         PlaySoundMem(seAttack, DX_PLAYTYPE_BACK);
 
         Enemy* enemy = FindGameObject<Enemy>();
-        if (enemy && !enemy->isDead)
+        if (enemy && !enemy->isDead())
         {
             VECTOR2 epos = enemy->GetPosition();
             if (fabs(position.x - epos.x) < 60 &&
@@ -163,7 +169,7 @@ void Player::Update()
 
     // --- Enemy 押し出し ---
     Enemy* enemy = FindGameObject<Enemy>();
-    if (enemy && !enemy->isDead)
+    if (enemy && !enemy->isDead())
     {
         VECTOR2 epos = enemy->GetPosition();
         float dx = position.x - epos.x;
@@ -229,4 +235,9 @@ void Player::Damage(int value)
 {
     hp -= value;
     damageTimer = 60;
+}
+
+bool Player::isDead() const
+{
+    return isDead_;
 }

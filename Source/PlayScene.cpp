@@ -12,8 +12,8 @@ PlayScene::PlayScene()
 
 PlayScene::~PlayScene()
 {
-    delete stage_;
-    stage_ = nullptr;
+    /*delete stage_;
+    stage_ = nullptr;*/
 }
 
 void PlayScene::Update()
@@ -45,5 +45,9 @@ void PlayScene::Update()
 
 void PlayScene::Draw()
 {
+    if (stage_)
+    {
+        stage_->Draw();   // ← これが無いとステージは表示されない
+    }
     DrawString(60, 0, "PlayScene", GetColor(255, 255, 255));
 }

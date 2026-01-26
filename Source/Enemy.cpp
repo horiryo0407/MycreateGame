@@ -30,11 +30,11 @@ Enemy::Enemy(VECTOR2 pos)
 
     velocityY = 0.0f;
     onGround = false;
-    isDead = false;
+    isDead_ = false;
     dir = -1;
 
-    isDead = false;
-    seDie = LoadSoundMem("Sound/メニューを開く3.mp3");
+    
+    //Die = LoadSoundMem("Sound/メニューを開く3.mp3");
 }
 
 Enemy::~Enemy()
@@ -43,7 +43,7 @@ Enemy::~Enemy()
 
 void Enemy::Update()
 {
-    if (isDead) return;
+    if (isDead_) return;
     Stage* st = FindGameObject<Stage>();
     Player* pl = FindGameObject<Player>();
     if (!st) return;
@@ -129,7 +129,7 @@ void Enemy::Update()
 
 void Enemy::Draw()
 {
-    if (isDead) return;
+    if (isDead_) return;
 
     Object2D::Draw();
 
@@ -161,17 +161,27 @@ void Enemy::DrawUI()
         "ENEMY %d / %d", hp, maxHp);
 }
 
+bool Enemy::isDead() const
+{
+    return isDead_;
+}
+
+
 void Enemy::Damage(int value)
 {
-    if (isDead) return;
+    if (isDead_) return;
 
     hp -= value;
 
     if (hp <= 0)
     {
         hp = 0;
-        isDead = true;
-        PlaySoundMem(seDie, DX_PLAYTYPE_BACK);
+        isDead_ = true;
+        //PlaySoundMem(seDie, DX_PLAYTYPE_BACK);
     }
 }
 
+void Enemy::Kill()
+{
+    isDead_ = true;
+}
