@@ -10,11 +10,13 @@ public:
 	void Draw() override;
 	void DrawUI();
 	void Damage(int value);
+	bool isDead() const;
 private:
 	float velocityY;
 	bool onGround;
 	bool prevPushed;
 	bool prevAttack;
+	
 
 	float Gravity;
 	float JumpHeight;
@@ -25,5 +27,7 @@ private:
 	int maxHp;
 	int damageTimer;
 	int attackTimer;
+
+	bool isDead_;
 
 };

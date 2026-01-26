@@ -37,13 +37,15 @@ Player::Player(VECTOR2 pos)
     position = pos;
     velocityY = 0.0f;
     attackTimer = 0;
-    maxHp = 100;
-    hp = 100;
+    maxHp = 10;
+    hp = 10;
 
     prevAttack = false;
     prevPushed = false;
-    onGround = false;
+    onGround =   false;
     damageTimer = 0;
+	isDead_ = false;
+	
 }
 
 Player::~Player()
@@ -52,6 +54,11 @@ Player::~Player()
 
 void Player::Update()
 {
+    if (hp <= 0)
+    {
+        isDead_ = true;
+        return;
+    }
     Stage* st = FindGameObject<Stage>();
     if (!st) return;
 
@@ -137,7 +144,7 @@ void Player::Update()
     if (nowAttack && !prevAttack && attackTimer == 0)
     {
         Enemy* enemy = FindGameObject<Enemy>();
-        if (enemy && !enemy->isDead)
+        if (enemy && !enemy->isDead())
         {
             VECTOR2 epos = enemy->GetPosition();
             if (fabs(position.x - epos.x) < 60 &&
@@ -156,7 +163,7 @@ void Player::Update()
 
     // --- Enemy ‰Ÿ‚µo‚µ ---
     Enemy* enemy = FindGameObject<Enemy>();
-    if (enemy && !enemy->isDead)
+    if (enemy && !enemy->isDead())
     {
         VECTOR2 epos = enemy->GetPosition();
         float dx = position.x - epos.x;
@@ -187,6 +194,8 @@ void Player::Update()
 
 void Player::Draw()
 {
+    if (isDead_) return;
+
     Object2D::Draw();
 
     // –{‘Ì
@@ -220,6 +229,14 @@ void Player::DrawUI()
 
 void Player::Damage(int value)
 {
+    if (isDead_) return;
+
     hp -= value;
+    if (hp < 0) hp = 0;
     damageTimer = 60;
+}
+
+bool Player::isDead() const
+{
+    return false;
 }

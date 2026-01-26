@@ -1,31 +1,49 @@
 #include "PlayScene.h"
 #include <DxLib.h>
 #include "Stage.h"
+#include "Player.h"
+#include "Enemy.h"
 
 PlayScene::PlayScene()
+    : stage_(nullptr)
 {
-	new Stage();
+    stage_ = new Stage();
 }
 
 PlayScene::~PlayScene()
 {
+    delete stage_;
+    stage_ = nullptr;
 }
 
 void PlayScene::Update()
 {
-	if (CheckHitKey(KEY_INPUT_T)) {
-		SceneManager::ChangeScene("TITLE");
-	}
+    Player* player = FindGameObject<Player>();
+    Enemy* enemy = FindGameObject<Enemy>();
+
+    // ===== Player死亡 → GAMEOVER =====
+    if (player && player->isDead())
+    {
+        SceneManager::ChangeScene("GAMEOVER");
+        return;
+    }
+
+    // ===== Enemy死亡 → CLEAR =====
+    if (enemy && enemy->isDead())
+    {
+        SceneManager::ChangeScene("CLEAR");
+        return;
+    }
+
+    // ===== デバッグ用 =====
+    if (CheckHitKey(KEY_INPUT_T))
+    {
+        SceneManager::ChangeScene("TITLE");
+        return;
+    }
 }
 
 void PlayScene::Draw()
 {
-	DrawString(60, 0, "ぷぇいやー", GetColor(255, 255, 255));
-	//DrawString(100, 400, "Push [T]Key To Title", GetColor(255, 255, 255));
+    DrawString(60, 0, "PlayScene", GetColor(255, 255, 255));
 }
-
-
-
-//コードメモリー　 Code Memory
-//スタックメモリー Stack Memory
-//ヒープメモリー   Heap Memory

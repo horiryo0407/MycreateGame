@@ -12,8 +12,8 @@ public:
     void Draw() override;
     void DrawUI();
     void Damage(int value);
-    void Kill() { hp = 0; isDead = true; }
-    bool isDead;
+    void Kill();
+    bool isDead() const;
 
 private:
     int hp;
@@ -32,4 +32,6 @@ private:
 
     float moveSpeed;
     int dir;
+
+    bool isDead_;
 };

@@ -30,7 +30,7 @@ Enemy::Enemy(VECTOR2 pos)
 
     velocityY = 0.0f;
     onGround = false;
-    isDead = false;
+    isDead_ = false;
     dir = -1;
 }
 
@@ -125,7 +125,7 @@ void Enemy::Update()
 
 void Enemy::Draw()
 {
-    if (isDead) return;
+    if (isDead_) return;
 
     Object2D::Draw();
 
@@ -161,4 +161,16 @@ void Enemy::Damage(int value)
 {
     hp -= value;
     damageTimer = 60;
+}
+
+
+void Enemy::Kill()
+{
+    isDead_ = true;
+}
+
+
+bool Enemy::isDead() const
+{
+    return isDead_;
 }
