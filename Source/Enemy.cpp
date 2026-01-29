@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include "Stage.h"
 #include "Player.h"
+#include "Bullet.h"
 #include "CsvReader.h"
 #include <DxLib.h>
 
@@ -23,9 +24,12 @@ Enemy::Enemy(VECTOR2 pos)
 
     maxHp = 50;
     hp = 50;
+    anim = 0;
+    animY = 1;
 
     damageTimer = 0;
     attackTimer = 0;
+    shotTimer = 0;
     jumpTimer = 60;
 
     velocityY = 0.0f;
@@ -57,9 +61,17 @@ void Enemy::Update()
     // ===== プレイヤー方向を見る =====
     if (pl)
     {
-        dir = (pl->GetPosition().x > position.x) ? 1 : -1;
+        if (pl->GetPosition().x > position.x)
+        {
+            dir = 1;
+            animY = 3;   // 右向き行
+        }
+        else
+        {
+            dir = -1;
+            animY = 1;   // 左向き行
+        }
     }
-
     // ===== 横移動 =====
     position.x += moveSpeed * dir;
 
@@ -114,28 +126,62 @@ void Enemy::Update()
     if (damageTimer > 0) damageTimer--;
     if (attackTimer > 0) attackTimer--;
 
-    // ===== 攻撃 =====
-    if (attackTimer == 0 && pl)
+
+    // ===== 弾発射タイマー =====
+    if (shotTimer > 0)
+        shotTimer--;
+
+    // ===== 弾を撃つ =====
+    if (shotTimer == 0 && pl)
     {
+        // プレイヤーとの距離チェック（撃ちすぎ防止）
         VECTOR2 p = pl->GetPosition();
-        if (fabs(position.x - p.x) < 40 &&
-            fabs(position.y - p.y) < 40)
+        float dx = fabs(position.x - p.x);
+        float dy = fabs(position.y - p.y);
+
+        if (dx < 400 && dy < 100) // 射程
         {
-            pl->Damage(5);
-            attackTimer = 60;
+            VECTOR2 bulletPos = position;
+            bulletPos.y -= 10;          // 口あたり
+            bulletPos.x += dir * 30;    // 体の前
+
+            Bullet* b = new Bullet(bulletPos,dir); // ★敵の弾
+            b->isEnemyBullet = true;
+            shotTimer = 90; // 1.5秒に1発（60fps想定）
         }
     }
+
+    //// ===== 攻撃 =====
+    //if (attackTimer == 0 && pl)
+    //{
+    //    VECTOR2 p = pl->GetPosition();
+    //    if (fabs(position.x - p.x) < 40 &&
+    //        fabs(position.y - p.y) < 40)
+    //    {
+    //        pl->Damage(5);
+    //        attackTimer = 60;
+    //    }
+    //}
 }
 
 void Enemy::Draw()
 {
     if (isDead_) return;
 
-    Object2D::Draw();
+   /* Object2D::Draw();
 
     DrawBox(position.x - 24, position.y - 32,
         position.x + 24, position.y + 32,
-        GetColor(0, 0, 255), FALSE);
+        GetColor(0, 0, 255), FALSE);*/
+    DrawRectGraph(
+        position.x - 32,
+        position.y - 32,
+        anim * 64,
+        animY * 64,
+        64, 64,
+        hImage,
+        TRUE
+    );
 
     DrawUI();
 }

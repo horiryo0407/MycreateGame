@@ -19,9 +19,12 @@ public:
 private:
     int hp;
     int maxHp;
+    int anim;
+    int animY;
 
     int damageTimer;
     int attackTimer;
+    int shotTimer;
     int jumpTimer;
 
     float velocityY;

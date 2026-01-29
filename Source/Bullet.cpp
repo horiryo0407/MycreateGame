@@ -1,6 +1,7 @@
 #include "Bullet.h"
 #include "Stage.h"
 #include "Enemy.h"
+#include "Player.h"
 #include <assert.h>
 
 Bullet::Bullet(VECTOR2 pos, int dir)
@@ -8,6 +9,7 @@ Bullet::Bullet(VECTOR2 pos, int dir)
     position = pos;
     direction = dir;
     speed = 8.0f;
+    isEnemyBullet = false;
 
     hImage = LoadGraph("data/image/player.png");
     assert(hImage > 0);
@@ -28,16 +30,36 @@ void Bullet::Update()
         return;
     }
 
-    // 敵に当たったらダメージ
-    Enemy* enemy = FindGameObject<Enemy>();
-    if (enemy && !enemy->isDead())
+    if (!isEnemyBullet)
     {
-        VECTOR2 epos = enemy->GetPosition();
-        if (fabs(position.x - epos.x) < 24 &&
-            fabs(position.y - epos.y) < 24)
+        Enemy* enemy = FindGameObject<Enemy>();
+        if (enemy && !enemy->isDead())
         {
-            enemy->Damage(3);
-            isDead = true;
+            VECTOR2 epos = enemy->GetPosition();
+            if (fabs(position.x - epos.x) < 24 &&
+                fabs(position.y - epos.y) < 24)
+            {
+                enemy->Damage(3);
+                isDead = true;
+                return;
+            }
+        }
+    }
+
+    // ===== 敵弾 → プレイヤーに当たる =====
+    if (isEnemyBullet)
+    {
+        Player* pl = FindGameObject<Player>();
+        if (pl)
+        {
+            VECTOR2 ppos = pl->GetPosition();
+            if (fabs(position.x - ppos.x) < 24 &&
+                fabs(position.y - ppos.y) < 24)
+            {
+                pl->Damage(3);
+                isDead = true;
+                return;
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ public:
 
     void Update() override;
     void Draw() override;
-
+    bool isEnemyBullet;
 private:
     float speed;
     int direction; // -1:ç∂ / 1:âE
