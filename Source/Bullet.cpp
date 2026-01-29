@@ -56,7 +56,7 @@ void Bullet::Update()
             if (fabs(position.x - ppos.x) < 24 &&
                 fabs(position.y - ppos.y) < 24)
             {
-                pl->Damage(3);
+                pl->Damage(1);
                 isDead = true;
                 return;
             }

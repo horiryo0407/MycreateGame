@@ -11,9 +11,9 @@ Enemy::Enemy() : Enemy(VECTOR2(300, 200))
 
 Enemy::Enemy(VECTOR2 pos)
 {
-    if (Gravity <= 0) Gravity = 0.6f;
-    if (JumpHeight <= 0) JumpHeight = 64;
-    if (moveSpeed <= 0) moveSpeed = 2;
+    if (Gravity <= 0) Gravity = 0.5f;
+    if (JumpHeight <= 0) JumpHeight = 192;
+    if (moveSpeed <= 0) moveSpeed = 3.5;
 
     hImage = LoadGraph("data/image/tamadot.png");
     JumpV0 = -sqrtf(2.0f * Gravity * JumpHeight);
@@ -61,17 +61,23 @@ void Enemy::Update()
     // ===== プレイヤー方向を見る =====
     if (pl)
     {
-        if (pl->GetPosition().x > position.x)
+        float dx = pl->GetPosition().x - position.x;
+
+        const float FACE_THRESHOLD = 12.0f; // ★重要
+
+        if (dx > FACE_THRESHOLD)
         {
             dir = 1;
-            animY = 3;   // 右向き行
+            animY = 3;   // 右向き
         }
-        else
+        else if (dx < -FACE_THRESHOLD)
         {
             dir = -1;
-            animY = 1;   // 左向き行
+            animY = 1;   // 左向き
         }
+        // ★それ以外（ほぼ同じx）は向きを固定
     }
+
     // ===== 横移動 =====
     position.x += moveSpeed * dir;
 

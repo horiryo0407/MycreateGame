@@ -49,5 +49,5 @@ void PlayScene::Draw()
     {
         stage_->Draw();   // ← これが無いとステージは表示されない
     }
-    DrawString(60, 0, "PlayScene", GetColor(255, 255, 255));
+    DrawString(60, 0, "Player", GetColor(255, 255, 255));
 }
