@@ -2,6 +2,7 @@
 #include <assert.h>
 #include "Stage.h"
 #include "Enemy.h"
+#include "Bullet.h"
 #include "../ImGui/imgui.h"
 #include "CsvReader.h"
 
@@ -37,6 +38,7 @@ Player::Player(VECTOR2 pos)
     position = pos;
     velocityY = 0.0f;
     attackTimer = 0;
+    shotTimer = 0;          // ★追加
     maxHp = 10;
     hp = 10;
 
@@ -46,8 +48,7 @@ Player::Player(VECTOR2 pos)
     damageTimer = 0;
 
     isDead_ = false;
-   /* seAttack = LoadSoundMem("Sound/キャンセル3.mp3");
-    seHit = LoadSoundMem("Sound/決定ボタンを押す15.mp3");*/
+    dir = 1;
 }
 
 Player::~Player()
@@ -61,11 +62,14 @@ void Player::Update()
         isDead_ = true;
         return;
     }
+
     Stage* st = FindGameObject<Stage>();
     if (!st) return;
 
     // --- 横移動 ---
     if (CheckHitKey(KEY_INPUT_D)) {
+        dir =1; // ★向き更新
+        animY = 3;
         position.x += moveSpeed;
         int push = st->CheckRight(position + VECTOR2(24, -31));
         position.x -= push;
@@ -73,15 +77,19 @@ void Player::Update()
         position.x -= push;
     }
     if (CheckHitKey(KEY_INPUT_A)) {
+        dir = -1;                // ★向き更新
+        animY = 1;               // ★左向き行
         position.x -= moveSpeed;
+
         int push = st->CheckLeft(position + VECTOR2(-24, -31));
         position.x += push;
         push = st->CheckLeft(position + VECTOR2(-24, 31));
         position.x += push;
     }
 
+
     // ===== ステージ端制限 =====
-    const int HALF = 24; // Player半分幅（DrawBox基準）
+    const int HALF = 24;
     int leftLimit = HALF;
     int rightLimit = st->GetMapWidth() - HALF;
 
@@ -135,18 +143,15 @@ void Player::Update()
         }
     }
 
-    // --- ダメージ無敵タイマー ---
-    if (damageTimer > 0) {
+    // --- ダメージ無敵 ---
+    if (damageTimer > 0)
         damageTimer--;
-    }
 
-    // --- 攻撃 ---
+    // --- 近接攻撃 ---
     bool nowAttack = CheckHitKey(KEY_INPUT_H);
 
     if (nowAttack && !prevAttack && attackTimer == 0)
     {
-        PlaySoundMem(seAttack, DX_PLAYTYPE_BACK);
-
         Enemy* enemy = FindGameObject<Enemy>();
         if (enemy && !enemy->isDead())
         {
@@ -155,7 +160,6 @@ void Player::Update()
                 fabs(position.y - epos.y) < 60)
             {
                 enemy->Damage(5);
-                PlaySoundMem(seHit, DX_PLAYTYPE_BACK);
                 attackTimer = 30;
             }
         }
@@ -163,8 +167,23 @@ void Player::Update()
 
     prevAttack = nowAttack;
 
-    if (attackTimer > 0) {
+    if (attackTimer > 0)
         attackTimer--;
+
+    // --- 弾発射 ★追加 ---
+    if (shotTimer > 0)
+        shotTimer--;
+
+    if (CheckHitKey(KEY_INPUT_J) && shotTimer == 0)
+    {
+        VECTOR2 bulletPos = position;
+        bulletPos.x += dir * 30;
+        bulletPos.y -= 10;
+
+        new Bullet(bulletPos, dir);
+
+
+        shotTimer = 20;
     }
 
     // --- Enemy 押し出し ---
@@ -183,26 +202,18 @@ void Player::Update()
             else
                 position.x -= push;
 
-            // 押し出し後も端制限
             if (position.x < leftLimit)
                 position.x = leftLimit;
             else if (position.x > rightLimit)
                 position.x = rightLimit;
         }
     }
-
-    // ImGui デバッグ（必要なら）
-    // ImGui::Begin("Player");
-    // ImGui::Checkbox("onGround", &onGround);
-    // ImGui::InputFloat("positionY", &position.y);
-    // ImGui::End();
 }
 
 void Player::Draw()
 {
     Object2D::Draw();
 
-    // 本体
     DrawBox(position.x - 24, position.y - 32,
         position.x + 24, position.y + 32,
         GetColor(255, 0, 0), FALSE);
@@ -210,7 +221,6 @@ void Player::Draw()
     DrawUI();
 }
 
-// HPバー描画
 void Player::DrawUI()
 {
     int x = 20;

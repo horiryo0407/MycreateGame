@@ -34,13 +34,15 @@ public:
 
 	int GetBlock(int x, int y);
 
+	bool IsWall(VECTOR2 pos);
+
 private:
 	float scrollX; // â°ÉXÉNÉçÅ[Éãó 
 
-	bool IsWall(VECTOR2 pos);
+	
 
 	int hBgImage;
-
+	int bgmHandle;
 
 	std::vector<std::vector<int>> map;
 };

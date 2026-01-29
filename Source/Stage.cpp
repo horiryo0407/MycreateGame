@@ -3,6 +3,7 @@
 #include <vector>
 #include "Player.h"
 #include "Enemy.h"
+#include "Bullet.h"
 #include "CsvReader.h"
 
 //std::vector<std::vector<int>> map = {
@@ -16,6 +17,9 @@
 
 Stage::Stage()
 {
+
+	bgmHandle = LoadSoundMem("data/image/hori.mp3");
+	assert(bgmHandle != -1);
 	// ステージデータの読み込み
 	CsvReader* csv = new CsvReader("data/map/stage0.csv");
 	for (int line = 0; line < csv->GetLines(); line++) {
@@ -53,7 +57,7 @@ Stage::Stage()
 			}
 		}
 	}
-
+	PlaySoundMem(bgmHandle, DX_PLAYTYPE_LOOP);
 	//hBgImage = LoadGraph("data/image/Background.png");
 	//assert(hBgImage > 0);
 
@@ -61,6 +65,7 @@ Stage::Stage()
 
 Stage::~Stage()
 {
+	StopSoundMem(bgmHandle);
 }
 
 void Stage::Draw()

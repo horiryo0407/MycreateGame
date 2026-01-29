@@ -34,5 +34,5 @@ private:
     float moveSpeed;
     int dir;
 
-    bool isDead_;          // © š‚±‚ê‚ğ’Ç‰Á
+    bool isDead_;          
 };

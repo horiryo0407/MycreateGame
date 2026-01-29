@@ -27,8 +27,10 @@ private:
 	int maxHp;
 	int damageTimer;
 	int attackTimer;
+	int shotTimer;
 	int seAttack;
 	int seHit;
+	int dir;
 
 
 	bool isDead_;
