@@ -40,6 +40,12 @@ Stage::Stage()
 
 	scrollX = 0;
 
+	startTimer = 180;   // 3•bi60fps‘z’èj
+	isStarted = false;
+	timerFont = CreateFontToHandle(nullptr, 64, 3);
+	
+
+
 	for (int y = 0; y < map.size(); y++) {
 		for (int x = 0; x < map[y].size(); x++) {
 			int c = map[y][x];
@@ -66,10 +72,25 @@ Stage::Stage()
 Stage::~Stage()
 {
 	StopSoundMem(bgmHandle);
+	DeleteFontToHandle(timerFont);
+
 }
 
 void Stage::Draw()
 {
+
+	if (!isStarted)
+	{
+		int sec = startTimer / 60 + 1;
+
+		DrawFormatStringToHandle(
+			600, 300,
+			GetColor(255, 255, 255),
+			timerFont,
+			"%d",
+			sec
+		);
+	}
 	//DrawGraph(0, 0, hBgImage, TRUE);
 	int w = imageSize.x;
 	int h = imageSize.y;
@@ -83,6 +104,19 @@ void Stage::Draw()
 			else if (c == 2) {
 				DrawRectGraph(x * w, y * h, 5 * w, 0 * h, w, h, hImage, TRUE);
 			}
+		}
+	}
+}
+
+
+void Stage::Update()
+{
+	if (!isStarted)
+	{
+		startTimer--;
+		if (startTimer <= 0)
+		{
+			isStarted = true;
 		}
 	}
 }

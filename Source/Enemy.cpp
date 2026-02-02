@@ -47,8 +47,10 @@ Enemy::~Enemy()
 
 void Enemy::Update()
 {
-    if (isDead_) return;
     Stage* st = FindGameObject<Stage>();
+    if (st && !st->IsStarted()) return;
+    if (isDead_) return;
+    //Stage* st = FindGameObject<Stage>();
     Player* pl = FindGameObject<Player>();
     if (!st) return;
 

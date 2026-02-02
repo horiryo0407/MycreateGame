@@ -57,13 +57,15 @@ Player::~Player()
 
 void Player::Update()
 {
+    Stage* st = FindGameObject<Stage>();
+    if (st && !st->IsStarted()) return;
     if (hp <= 0)
     {
         isDead_ = true;
         return;
     }
 
-    Stage* st = FindGameObject<Stage>();
+    //Stage* st = FindGameObject<Stage>();
     if (!st) return;
 
     // --- ‰¡ˆÚ“® ---

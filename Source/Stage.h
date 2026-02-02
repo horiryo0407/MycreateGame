@@ -8,6 +8,7 @@ public:
 	~Stage();
 	void Draw() override;
 	float ScrollX() { return scrollX; }
+	void Update() override;
 
 	/// <summary>
 	/// 
@@ -36,6 +37,8 @@ public:
 
 	bool IsWall(VECTOR2 pos);
 
+	bool IsStarted() const { return isStarted; }
+
 private:
 	float scrollX; // 横スクロール量
 
@@ -43,6 +46,8 @@ private:
 
 	int hBgImage;
 	int bgmHandle;
-
+	int startTimer;     // 開始前カウントダウン
+	bool isStarted;    // ゲーム開始済みか
+	int timerFont;
 	std::vector<std::vector<int>> map;
 };

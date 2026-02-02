@@ -11,19 +11,21 @@ Bullet::Bullet(VECTOR2 pos, int dir)
     speed = 8.0f;
     isEnemyBullet = false;
 
-    hImage = LoadGraph("data/image/player.png");
+    hImage = LoadGraph("data/image/ha.png");
     assert(hImage > 0);
 
-    imageSize = VECTOR2(32, 32);
-    imageSize = VECTOR2(16, 16);
+    imageSize = VECTOR2(128, 128);
+    //imageSize = VECTOR2(16, 16);
 }
 
 void Bullet::Update()
 {
+    Stage* st = FindGameObject<Stage>();
+    if (st && !st->IsStarted()) return;
     position.x += speed * direction;
 
     // ï«Ç…ìñÇΩÇ¡ÇΩÇÁè¡Ç∑
-    Stage* st = FindGameObject<Stage>();
+    //Stage* st = FindGameObject<Stage>();
     if (st && st->IsWall(position))
     {
         isDead = true;
