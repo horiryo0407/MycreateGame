@@ -14,6 +14,12 @@
     <ClCompile Include="Source\TitleScene.cpp">
       <Filter>TitleScene</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ClearScene.cpp">
+      <Filter>ClearScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameOverScene.cpp">
+      <Filter>GameOverScene</Filter>
+    </ClCompile>
     <ClCompile Include="Source\PlayScene.cpp">
       <Filter>PlayScene</Filter>
     </ClCompile>
@@ -87,6 +93,12 @@
     <ClInclude Include="Source\TitleScene.h">
       <Filter>TitleScene</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ClearScene.h">
+      <Filter>ClearScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GameOverScene.h">
+      <Filter>GameOverScene</Filter>
+    </ClInclude>
     <ClInclude Include="Source\PlayScene.h">
       <Filter>PlayScene</Filter>
     </ClInclude>
@@ -157,6 +169,12 @@
     </Filter>
     <Filter Include="TitleScene">
       <UniqueIdentifier>{a52f9c67-9c6c-4376-8f4c-07a10ecbc3db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ClearScene">
+      <UniqueIdentifier>{b5e9c5f7-9c66-4c9f-9c0a-2ef2b8e63f20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameOverScene">
+      <UniqueIdentifier>{1d5aa2a2-0a3a-4b2b-8c3a-4b22f1fb7d28}</UniqueIdentifier>
     </Filter>
     <Filter Include="PlayScene">
       <UniqueIdentifier>{8123ada4-16d1-40da-a8f3-3f9e93aafb30}</UniqueIdentifier>

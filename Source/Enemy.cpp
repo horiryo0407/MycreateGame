@@ -15,7 +15,7 @@ Enemy::Enemy(VECTOR2 pos)
     if (JumpHeight <= 0) JumpHeight = 192;
     if (moveSpeed <= 0) moveSpeed = 3.5;
 
-    hImage = LoadGraph("data/image/tamadot.png");
+    hImage = LoadGraph("data/image/enemy.png");
     JumpV0 = -sqrtf(2.0f * Gravity * JumpHeight);
 
     imageSize = VECTOR2(64, 64);
@@ -36,6 +36,8 @@ Enemy::Enemy(VECTOR2 pos)
     onGround = false;
     isDead_ = false;
     dir = -1;
+    drawSize = VECTOR2(128, 128);
+
 
     
     //Die = LoadSoundMem("Sound/メニューを開く3.mp3");
@@ -123,12 +125,18 @@ void Enemy::Update()
     velocityY += Gravity;
     onGround = false;
 
-    if (st->IsBlock(position.x, position.y + 32))
+    const int BODY_HALF_Y = 24; // 32 → 24 に
+
+    if (st->IsBlock(position.x, position.y + BODY_HALF_Y))
     {
         velocityY = 0;
         onGround = true;
-        position.y = (int(position.y / 64) * 64) + 32;
+
+        int tileY = (int)((position.y + BODY_HALF_Y) / 64);
+        position.y = tileY * 64 - BODY_HALF_Y;
     }
+
+
 
     // ===== タイマー =====
     if (damageTimer > 0) damageTimer--;
@@ -181,12 +189,20 @@ void Enemy::Draw()
     DrawBox(position.x - 24, position.y - 32,
         position.x + 24, position.y + 32,
         GetColor(0, 0, 255), FALSE);*/
-    DrawRectGraph(
-        position.x - 32,
-        position.y - 32,
+  /*  DrawRectGraph(
+        position.x-32,
+        position.y-32,
         anim * 64,
         animY * 64,
         64, 64,
+        hImage,
+        TRUE
+    );*/
+    DrawExtendGraph(
+        position.x - drawSize.x / 2,
+        position.y - drawSize.y / 2,
+        position.x + drawSize.x / 2,
+        position.y + drawSize.y / 2,
         hImage,
         TRUE
     );

@@ -1,212 +1,274 @@
-#include "Stage.h"
+ï»¿#include "Stage.h"
 #include <assert.h>
-#include <vector>
 #include "Player.h"
 #include "Enemy.h"
-#include "Bullet.h"
 #include "CsvReader.h"
+#include "Screen.h"
+#include <DxLib.h>
 
-//std::vector<std::vector<int>> map = {
-//	{ 10,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-//	{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
-//	{ 0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-//	{ 0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0},
-//	{ 0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0},
-//	{ 0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1},
-//};
+// ------------------------------
+// ä¾¿åˆ©é–¢æ•°
+// ------------------------------
+static int LerpInt(int a, int b, float t)
+{
+    if (t < 0.0f) t = 0.0f;
+    if (t > 1.0f) t = 1.0f;
+    return (int)(a + (b - a) * t);
+}
 
+// ------------------------------
+// èƒŒæ™¯æç”»
+// ------------------------------
+static void DrawFightBackground()
+{
+    const int w = Screen::WIDTH;
+    const int h = Screen::HEIGHT;
+
+    const int topR = 255, topG = 196, topB = 205;
+    const int botR = 180, botG = 60, botB = 80;
+
+    for (int y = 0; y < h; y += 4) {
+        float t = (float)y / (float)h;
+        int r = LerpInt(topR, botR, t);
+        int g = LerpInt(topG, botG, t);
+        int b = LerpInt(topB, botB, t);
+        DrawBox(0, y, w, y + 4, GetColor(r, g, b), TRUE);
+    }
+}
+
+// ------------------------------
+// Stage
+// ------------------------------
 Stage::Stage()
 {
+    bgmHandle = LoadSoundMem("data/image/hori.mp3");
+    assert(bgmHandle != -1);
 
-	bgmHandle = LoadSoundMem("data/image/hori.mp3");
-	assert(bgmHandle != -1);
-	// ƒXƒe[ƒWƒf[ƒ^‚Ì“Ç‚İ‚İ
-	CsvReader* csv = new CsvReader("data/map/stage0.csv");
-	for (int line = 0; line < csv->GetLines(); line++) {
-		std::vector<int> mapLine;
-		for (int column = 0; column < csv->GetColumns(line); column++) {
-			int c = csv->GetInt(line, column);
-			mapLine.push_back(c);
-		}
-		map.push_back(mapLine);
-	}
-	delete csv;
+    // ãƒãƒƒãƒ—èª­ã¿è¾¼ã¿
+    CsvReader* csv = new CsvReader("data/map/stage0.csv");
+    for (int y = 0; y < csv->GetLines(); y++) {
+        std::vector<int> line;
+        for (int x = 0; x < csv->GetColumns(y); x++) {
+            line.push_back(csv->GetInt(y, x));
+        }
+        map.push_back(line);
+    }
+    delete csv;
 
-	hImage = LoadGraph("data/image/parts.png");
-	assert(hImage > 0);
-	imageSize = VECTOR2(64, 64);
-	anim = 3;
-	animY = 1;
+    imageSize = VECTOR2(64, 64);
 
-	scrollX = 0;
+    hToothImage = LoadGraph("data/image/ha.png");
+    ReversehToothImage = LoadGraph("data/image/sakasanoha.png");
+    assert(hToothImage > 0);
+    assert(ReversehToothImage > 0);
 
-	startTimer = 180;   // 3•bi60fps‘z’èj
-	isStarted = false;
-	timerFont = CreateFontToHandle(nullptr, 64, 3);
-	
+    // å¤©äº•
+    ceilingY = -1;
+    ceilingSpeed = 0.05f;   // â† è¿«ã‚‹é€Ÿã•
 
+    // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç”Ÿæˆ
+    for (int y = 0; y < map.size(); y++) {
+        for (int x = 0; x < map[y].size(); x++) {
+            int c = map[y][x];
+            int px = x * imageSize.x + imageSize.x / 2;
+            int py = y * imageSize.y + imageSize.y / 2;
 
-	for (int y = 0; y < map.size(); y++) {
-		for (int x = 0; x < map[y].size(); x++) {
-			int c = map[y][x];
-			if (c == 9) 
-			{
-				int px = x * imageSize.x + imageSize.x / 2.0f;
-				int py = y * imageSize.y + imageSize.y / 2.0f;
-				new Player(VECTOR2(px, py));
-			}
-			if (c == 7)  
-			{
-				int ex = x * imageSize.x + imageSize.x / 2.0f;
-				int ey = y * imageSize.y + imageSize.y / 2.0f;
-				new Enemy(VECTOR2(ex, ey));
-			}
-		}
-	}
-	PlaySoundMem(bgmHandle, DX_PLAYTYPE_LOOP);
-	//hBgImage = LoadGraph("data/image/Background.png");
-	//assert(hBgImage > 0);
+            if (c == 9) {
+                new Player(VECTOR2(px, py));
+            }
+            else if (c == 7) {
+                new Enemy(VECTOR2(px, py));
+            }
+            else if (c == 4 && ceilingY < 0) {
+                // æœ€ä¸Šæ®µã®4ã‚’å¤©äº•é–‹å§‹ä½ç½®ã«
+                ceilingY = y * imageSize.y;
+            }
+        }
+    }
 
+    startTimer = 180;
+    flashTimer = 0;
+    isStarted = false;
+    isHoriPlaying = false;
+    timerFont = CreateFontToHandle(nullptr, 64, 3);
+
+    //PlaySoundMem(bgmHandle, DX_PLAYTYPE_LOOP);
 }
 
 Stage::~Stage()
 {
-	StopSoundMem(bgmHandle);
-	DeleteFontToHandle(timerFont);
-
+    StopSoundMem(bgmHandle);
+    DeleteFontToHandle(timerFont);
 }
 
-void Stage::Draw()
-{
-
-	if (!isStarted)
-	{
-		int sec = startTimer / 60 + 1;
-
-		DrawFormatStringToHandle(
-			600, 300,
-			GetColor(255, 255, 255),
-			timerFont,
-			"%d",
-			sec
-		);
-	}
-	//DrawGraph(0, 0, hBgImage, TRUE);
-	int w = imageSize.x;
-	int h = imageSize.y;
-
-	for (int y = 0; y < map.size(); y++) {
-		for (int x = 0; x < map[y].size(); x++) {
-			int c = map[y][x];
-			if (c == 1) {
-				DrawRectGraph(x * w , y * h, 5 * w, 1 * h, w, h, hImage, TRUE);
-			}
-			else if (c == 2) {
-				DrawRectGraph(x * w, y * h, 5 * w, 0 * h, w, h, hImage, TRUE);
-			}
-		}
-	}
-}
-
-
+// ------------------------------
+// Update
+// ------------------------------
 void Stage::Update()
 {
-	if (!isStarted)
-	{
-		startTimer--;
-		if (startTimer <= 0)
-		{
-			isStarted = true;
-		}
-	}
+    if (!isStarted) {
+        startTimer--;
+        if (startTimer <= 0) {
+            isStarted = true;
+        }
+        return;
+    }
+
+    // å¤©äº•ã‚’ä¸‹ã’ã‚‹
+    if (ceilingY >= 0) {
+        ceilingY += ceilingSpeed;
+    }
+
+    Player* pl = FindGameObject<Player>();
+    if (pl && ceilingY >= 0)
+    {
+        float distance =
+            (pl->GetPosition().y - 32) - (ceilingY + imageSize.y);
+
+        // hori å†ç”Ÿé–‹å§‹
+        if (distance < 45 && !isHoriPlaying)
+        {
+            PlaySoundMem(bgmHandle, DX_PLAYTYPE_LOOP);
+            isHoriPlaying = true;
+        }
+    }
+
+    // â˜… hori ãŒé³´ã£ã¦ã„ã‚‹é–“ãšã£ã¨ã‚«ã‚¦ãƒ³ãƒˆ
+    if (isHoriPlaying)
+    {
+        flashTimer++;
+    }
+
+    // åœ§æ­»åˆ¤å®š
+    if (pl) {
+        float headY = pl->GetPosition().y - 32;
+        if (headY <= ceilingY + imageSize.y) {
+            pl->Damage(9999);
+        }
+    }
+
+    Enemy* en = FindGameObject<Enemy>();
+    if (en && !en->isDead()) {
+        float headY = en->GetPosition().y - 32;
+        if (headY <= ceilingY + imageSize.y) {
+            en->Kill();
+        }
+    }
+}
+
+
+// ------------------------------
+// Draw
+// ------------------------------
+void Stage::Draw()
+{
+    DrawFightBackground();
+
+    if (!isStarted) {
+        int sec = startTimer / 60 + 1;
+        DrawFormatStringToHandle(
+            600, 300,
+            GetColor(255, 255, 255),
+            timerFont,
+            "%d",
+            sec
+        );
+    }
+
+    int w = imageSize.x;
+    int h = imageSize.y;
+
+    // ãƒãƒƒãƒ—æç”»
+    for (int y = 0; y < map.size(); y++) {
+        for (int x = 0; x < map[y].size(); x++) {
+            int c = map[y][x];
+            if (c == 1 || c == 2) {
+                DrawRectGraph(x * w, y * h, 5 * w, 0, w, h, hToothImage, TRUE);
+            }
+            else if (c == 3) {
+                DrawGraph(x * w, y * h, hToothImage, TRUE);
+            }
+        }
+    }
+
+    // å¤©äº•æç”»
+    if (ceilingY >= 0) {
+        for (int x = 0; x < Screen::WIDTH; x += w) {
+            DrawGraph(x, (int)ceilingY, ReversehToothImage, TRUE);
+        }
+    }
+
+    // â˜… hori ä¸­ã¯ç”»é¢ã‚’ã¡ã‹ã¡ã‹
+    if (isHoriPlaying)
+    {
+        // sinæ³¢ã§ 0ã€œ1 ã‚’å¾€å¾©
+        float t = (sinf(flashTimer * 0.08f) + 1.0f) * 0.5f;
+
+        int alpha = (int)(t * 60);   // å¼·ã•èª¿æ•´
+        if (alpha > 100) alpha = 100;
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+        DrawBox(0, 0, Screen::WIDTH, Screen::HEIGHT,
+            GetColor(255, 0, 0), TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+    }
+}
+
+// ------------------------------
+// åˆ¤å®šç³»
+// ------------------------------
+bool Stage::IsBlock(int px, int py)
+{
+    int tx = px / imageSize.x;
+    int ty = py / imageSize.y;
+
+    if (ty < 0 || ty >= map.size()) return false;
+    if (tx < 0 || tx >= map[ty].size()) return false;
+
+    int c = map[ty][tx];
+    return (c == 1 || c == 2 || c == 3 || c ==4);
+}
+
+bool Stage::IsWall(VECTOR2 pos)
+{
+    int x = pos.x / imageSize.x;
+    int y = pos.y / imageSize.y;
+
+    if (y < 0 || y >= map.size()) return false;
+    if (x < 0 || x >= map[y].size()) return false;
+
+    int c = map[y][x];
+    return (c == 1 || c == 2 || c == 3);
 }
 
 int Stage::CheckRight(VECTOR2 pos)
 {
-	if (IsWall(pos) == false) {
-		return 0;
-	}
-	// ƒ`ƒbƒv‚É‚Ç‚ê‚®‚ç‚¢‚ß‚è‚ñ‚Å‚¢‚é‚©‚ğ•Ô‚·
-	int x = pos.x / imageSize.x;
-	int dx = pos.x - x * imageSize.x; // ƒ`ƒbƒv‚Ì’†‚ÌÀ•W
-	return dx+1;
+    if (!IsWall(pos)) return 0;
+    int x = pos.x / imageSize.x;
+    int dx = pos.x - x * imageSize.x;
+    return dx + 1;
 }
 
 int Stage::CheckLeft(VECTOR2 pos)
 {
-	if (IsWall(pos) == false) {
-		return 0;
-	}
-	// ƒ`ƒbƒv‚É‚Ç‚ê‚®‚ç‚¢‚ß‚è‚ñ‚Å‚¢‚é‚©‚ğ•Ô‚·
-	int x = pos.x / imageSize.x;
-	int dx = pos.x - x * imageSize.x; // ƒ`ƒbƒv‚Ì’†‚ÌÀ•W
-	return imageSize.x - dx;
+    if (!IsWall(pos)) return 0;
+    int x = pos.x / imageSize.x;
+    int dx = pos.x - x * imageSize.x;
+    return imageSize.x - dx;
 }
 
 int Stage::CheckDown(VECTOR2 pos)
 {
-	if (IsWall(pos) == false) {
-		return 0;
-	}
-	// ƒ`ƒbƒv‚É‚Ç‚ê‚®‚ç‚¢‚ß‚è‚ñ‚Å‚¢‚é‚©‚ğ•Ô‚·
-	int y = pos.y / imageSize.y;
-	int dy = pos.y - y * imageSize.y; // ƒ`ƒbƒv‚Ì’†‚ÌÀ•W
-	return dy + 1;
+    if (!IsWall(pos)) return 0;
+    int y = pos.y / imageSize.y;
+    int dy = pos.y - y * imageSize.y;
+    return dy + 1;
 }
 
 int Stage::CheckUp(VECTOR2 pos)
 {
-	if (IsWall(pos) == false) {
-		return 0;
-	}
-	// ƒ`ƒbƒv‚É‚Ç‚ê‚®‚ç‚¢‚ß‚è‚ñ‚Å‚¢‚é‚©‚ğ•Ô‚·
-	int y = pos.y / imageSize.y;
-	int dy = pos.y - y * imageSize.y; // ƒ`ƒbƒv‚Ì’†‚ÌÀ•W
-	return imageSize.y - dy;
-}
-
-bool Stage::IsBlock(int px, int py)
-{
-	int tx = px / imageSize.x;
-	int ty = py / imageSize.y;
-
-	if (ty < 0 || ty >= map.size()) return false;
-	if (tx < 0 || tx >= map[ty].size()) return false;
-
-	int c = map[ty][tx];
-	return (c == 1 || c == 2);
-}
-
-int Stage::GetBlock(int x, int y)
-{
-	int tx = x / imageSize.x;
-	int ty = y / imageSize.y;
-
-	// ƒ}ƒbƒvŠO‚Í•Çˆµ‚¢
-	if (ty < 0 || ty >= map.size()) return 1;
-	if (tx < 0 || tx >= map[ty].size()) return 1;
-
-	return map[ty][tx];
-}
-
-
-bool Stage::IsWall(VECTOR2 pos)
-{
-	// ƒ`ƒbƒv‚ÌêŠ‚ğ“Á’è‚·‚é
-	int x = pos.x / imageSize.x;
-	int y = pos.y / imageSize.y;
-	if (y < 0 || y >= map.size()) {
-		return false;
-	}
-	if (x < 0 || x >= map[y].size()) {
-		return false;
-	}
-	// ƒ`ƒbƒv‚Ì”Ô†‚ğŒ©‚ÄA•Ç‚©‚Ç‚¤‚©Šm’è‚·‚é
-	switch (map[y][x]) {
-	case 0:
-	case 9:
-	case 8:
-		return false;
-	}
-	return true;
+    if (!IsWall(pos)) return 0;
+    int y = pos.y / imageSize.y;
+    int dy = pos.y - y * imageSize.y;
+    return imageSize.y - dy;
 }

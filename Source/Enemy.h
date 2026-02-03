@@ -13,7 +13,7 @@ public:
     void DrawUI();
     void Damage(int value);
     void Kill();
-
+    VECTOR2 drawSize;
     bool isDead() const;   // Å© getter Ç…Ç∑ÇÈ
 
 private:

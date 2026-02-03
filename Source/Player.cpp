@@ -1,4 +1,4 @@
-#include "Player.h"
+ï»¿#include "Player.h"
 #include <assert.h>
 #include "Stage.h"
 #include "Enemy.h"
@@ -12,7 +12,7 @@ Player::Player() : Player(VECTOR2(100, 200))
 
 Player::Player(VECTOR2 pos)
 {
-    // ƒpƒ‰ƒ[ƒ^[“Ç
+    // ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼èª­è¾¼
     CsvReader* csv = new CsvReader("data/playerParam.csv");
     for (int i = 0; i < csv->GetLines(); i++) {
         std::string tag = csv->GetString(i, 0);
@@ -27,18 +27,18 @@ Player::Player(VECTOR2 pos)
         }
     }
     JumpV0 = -sqrtf(2.0f * Gravity * JumpHeight);
-
-    hImage = LoadGraph("data/image/tamadot.png");
+    SetTransColor(255, 255, 255);
+    hImage = LoadGraph("data/image/play.jpg");
     assert(hImage > 0);
 
-    imageSize = VECTOR2(64, 64);
-    anim = 0;
-    animY = 3;
+    imageSize = VECTOR2(128, 128);
+    anim = 2;
+    animY = 0;
 
     position = pos;
     velocityY = 0.0f;
     attackTimer = 0;
-    shotTimer = 0;          // š’Ç‰Á
+    shotTimer = 0;          // â˜…è¿½åŠ 
     maxHp = 10;
     hp = 10;
 
@@ -49,6 +49,8 @@ Player::Player(VECTOR2 pos)
 
     isDead_ = false;
     dir = 1;
+
+    ddrawSize = VECTOR2(128, 128);
 }
 
 Player::~Player()
@@ -68,9 +70,9 @@ void Player::Update()
     //Stage* st = FindGameObject<Stage>();
     if (!st) return;
 
-    // --- ‰¡ˆÚ“® ---
+    // --- æ¨ªç§»å‹• ---
     if (CheckHitKey(KEY_INPUT_D)) {
-        dir =1; // šŒü‚«XV
+        dir = 1; // â˜…å‘ãæ›´æ–°
         animY = 3;
         position.x += moveSpeed;
         int push = st->CheckRight(position + VECTOR2(24, -31));
@@ -79,8 +81,8 @@ void Player::Update()
         position.x -= push;
     }
     if (CheckHitKey(KEY_INPUT_A)) {
-        dir = -1;                // šŒü‚«XV
-        animY = 1;               // š¶Œü‚«s
+        dir = -1;                // â˜…å‘ãæ›´æ–°
+        animY = 1;               // â˜…å·¦å‘ãè¡Œ
         position.x -= moveSpeed;
 
         int push = st->CheckLeft(position + VECTOR2(-24, -31));
@@ -90,7 +92,7 @@ void Player::Update()
     }
 
 
-    // ===== ƒXƒe[ƒW’[§ŒÀ =====
+    // ===== ã‚¹ãƒ†ãƒ¼ã‚¸ç«¯åˆ¶é™ =====
     const int HALF = 24;
     int leftLimit = HALF;
     int rightLimit = st->GetMapWidth() - HALF;
@@ -100,7 +102,7 @@ void Player::Update()
     else if (position.x > rightLimit)
         position.x = rightLimit;
 
-    // --- ƒWƒƒƒ“ƒv ---
+    // --- ã‚¸ãƒ£ãƒ³ãƒ— ---
     if (onGround) {
         if (CheckHitKey(KEY_INPUT_SPACE)) {
             if (!prevPushed) {
@@ -113,7 +115,7 @@ void Player::Update()
         }
     }
 
-    // --- d—Í ---
+    // --- é‡åŠ› ---
     position.y += velocityY;
     velocityY += Gravity;
     onGround = false;
@@ -145,11 +147,11 @@ void Player::Update()
         }
     }
 
-    // --- ƒ_ƒ[ƒW–³“G ---
+    // --- ãƒ€ãƒ¡ãƒ¼ã‚¸ç„¡æ•µ ---
     if (damageTimer > 0)
         damageTimer--;
 
-    // --- ‹ßÚUŒ‚ ---
+    // --- è¿‘æ¥æ”»æ’ƒ ---
     bool nowAttack = CheckHitKey(KEY_INPUT_H);
 
     if (nowAttack && !prevAttack && attackTimer == 0)
@@ -172,7 +174,7 @@ void Player::Update()
     if (attackTimer > 0)
         attackTimer--;
 
-    // --- ’e”­Ë š’Ç‰Á ---
+    // --- å¼¾ç™ºå°„ â˜…è¿½åŠ  ---
     if (shotTimer > 0)
         shotTimer--;
 
@@ -188,7 +190,7 @@ void Player::Update()
         shotTimer = 20;
     }
 
-    // --- Enemy ‰Ÿ‚µo‚µ ---
+    // --- Enemy æŠ¼ã—å‡ºã— ---
     Enemy* enemy = FindGameObject<Enemy>();
     if (enemy && !enemy->isDead())
     {
@@ -214,14 +216,41 @@ void Player::Update()
 
 void Player::Draw()
 {
-    Object2D::Draw();
+    if (isDead_) return;
 
-    DrawBox(position.x - 24, position.y - 32,
-        position.x + 24, position.y + 32,
-        GetColor(255, 0, 0), FALSE);
+    int halfW = 64;
+    int halfH = 64;
 
+    int left, right;
+
+    if (dir == 1)
+    {
+        // å³å‘ãï¼ˆé€šå¸¸ï¼‰
+        left = (int)position.x - halfW;
+        right = (int)position.x + halfW;
+    }
+    else
+    {
+        // å·¦å‘ãï¼ˆåè»¢ï¼‰
+        left = (int)position.x + halfW;
+        right = (int)position.x - halfW;
+    }
+
+    int top = (int)position.y - halfH;
+    int bottom = (int)position.y + halfH;
+
+    DrawExtendGraph(left, top, right, bottom, hImage, TRUE);
+
+    // å½“ãŸã‚Šåˆ¤å®šï¼ˆãƒ‡ãƒãƒƒã‚°ï¼‰
+    DrawBox(
+        (int)position.x - 24, (int)position.y - 32,
+        (int)position.x + 24, (int)position.y + 32,
+        GetColor(255, 0, 0), FALSE
+    );
     DrawUI();
 }
+
+
 
 void Player::DrawUI()
 {
