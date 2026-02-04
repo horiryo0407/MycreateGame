@@ -28,7 +28,7 @@ Player::Player(VECTOR2 pos)
     }
     JumpV0 = -sqrtf(2.0f * Gravity * JumpHeight);
     SetTransColor(255, 255, 255);
-    hImage = LoadGraph("data/image/play.jpg");
+    hImage = LoadGraph("data/image/play.png");
     assert(hImage > 0);
 
     imageSize = VECTOR2(128, 128);
@@ -49,6 +49,10 @@ Player::Player(VECTOR2 pos)
 
     isDead_ = false;
     dir = 1;
+    maxAmmo = 6;   // ← 好きな数
+    ammo = maxAmmo;
+    reloadTimer = 0;
+
 
     ddrawSize = VECTOR2(128, 128);
 }
@@ -178,7 +182,7 @@ void Player::Update()
     if (shotTimer > 0)
         shotTimer--;
 
-    if (CheckHitKey(KEY_INPUT_J) && shotTimer == 0)
+    if (CheckHitKey(KEY_INPUT_J) && shotTimer == 0 && ammo > 0)
     {
         VECTOR2 bulletPos = position;
         bulletPos.x += dir * 30;
@@ -186,8 +190,22 @@ void Player::Update()
 
         new Bullet(bulletPos, dir);
 
-
+        ammo--;              // ★弾を消費
         shotTimer = 20;
+    }
+
+    if (ammo < maxAmmo)
+    {
+        reloadTimer++;
+        if (reloadTimer >= 60)   // 1秒で1発回復
+        {
+            ammo++;
+            reloadTimer = 0;
+        }
+    }
+    else
+    {
+        reloadTimer = 0;
     }
 
     // --- Enemy 押し出し ---
@@ -241,12 +259,12 @@ void Player::Draw()
 
     DrawExtendGraph(left, top, right, bottom, hImage, TRUE);
 
-    // 当たり判定（デバッグ）
-    DrawBox(
-        (int)position.x - 24, (int)position.y - 32,
-        (int)position.x + 24, (int)position.y + 32,
-        GetColor(255, 0, 0), FALSE
-    );
+    //// 当たり判定（デバッグ）
+    //DrawBox(
+    //    (int)position.x - 24, (int)position.y - 32,
+    //    (int)position.x + 24, (int)position.y + 32,
+    //    GetColor(255, 0, 0), FALSE
+    //);
     DrawUI();
 }
 
@@ -268,8 +286,25 @@ void Player::DrawUI()
     DrawBox(x, y, x + curW, y + h,
         GetColor(255, 0, 0), TRUE);
 
-    DrawFormatString(x, y + 24, GetColor(255, 255, 255),
-        "%d / %d", hp, maxHp);
+    DrawFormatString(x, y - 16, GetColor(0, 0, 0),
+        "PLAYER HP %d / %d", hp, maxHp);
+
+    int ax = 20;
+    int ay = 60;
+    int aw = 120;
+    int ah = 10;
+
+    float arate = (float)ammo / maxAmmo;
+    int cur = (int)(aw * arate);
+
+    DrawBox(ax - 1, ay - 1, ax + aw + 1, ay + ah + 1,
+        GetColor(0, 0, 0), FALSE);
+
+    DrawBox(ax, ay, ax + cur, ay + ah,
+        GetColor(100, 200, 255), TRUE);
+    DrawFormatString(x, y + 24, GetColor(0, 0, 0),
+        "BULLET COUNT %d / %d", ammo, maxAmmo);
+
 }
 
 void Player::Damage(int value)

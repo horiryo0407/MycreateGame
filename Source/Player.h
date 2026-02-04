@@ -32,6 +32,10 @@ private:
 	int seAttack;
 	int seHit;
 	int dir;
+	// ===== 弾数管理 =====
+	int ammo;          // 現在弾数
+	int maxAmmo;       // 最大弾数
+	int reloadTimer;   // 回復用タイマー
 
 
 

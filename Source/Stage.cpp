@@ -41,8 +41,10 @@ static void DrawFightBackground()
 // ------------------------------
 Stage::Stage()
 {
+    //bgHandle = LoadSoundMem("data/image/harap.mp3");
     bgmHandle = LoadSoundMem("data/image/hori.mp3");
-    assert(bgmHandle != -1);
+    int volume = 50;
+    assert(bgHandle != -1);
 
     // マップ読み込み
     CsvReader* csv = new CsvReader("data/map/stage0.csv");
@@ -64,7 +66,7 @@ Stage::Stage()
 
     // 天井
     ceilingY = -1;
-    ceilingSpeed = 0.05f;   // ← 迫る速さ
+    ceilingSpeed = 0.2f;   // ← 迫る速さ
 
     // オブジェクト生成
     for (int y = 0; y < map.size(); y++) {
@@ -91,8 +93,10 @@ Stage::Stage()
     isStarted = false;
     isHoriPlaying = false;
     timerFont = CreateFontToHandle(nullptr, 64, 3);
-
-    //PlaySoundMem(bgmHandle, DX_PLAYTYPE_LOOP);
+  
+    PlaySoundMem(bgmHandle, DX_PLAYTYPE_LOOP);
+    ChangeVolumeSoundMem(volume, bgmHandle);
+    
 }
 
 Stage::~Stage()
@@ -125,12 +129,12 @@ void Stage::Update()
         float distance =
             (pl->GetPosition().y - 32) - (ceilingY + imageSize.y);
 
-        // hori 再生開始
-        if (distance < 45 && !isHoriPlaying)
-        {
-            PlaySoundMem(bgmHandle, DX_PLAYTYPE_LOOP);
-            isHoriPlaying = true;
-        }
+        //// hori 再生開始
+        //if (distance < 45 && !isHoriPlaying)
+        //{
+        //    PlaySoundMem(bgmHandle, DX_PLAYTYPE_LOOP);
+        //    isHoriPlaying = true;
+        //}
     }
 
     // ★ hori が鳴っている間ずっとカウント
@@ -212,6 +216,15 @@ void Stage::Draw()
             GetColor(255, 0, 0), TRUE);
         SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
+    // 左右に黒フェード
+    DrawBox(0, 0, 16, Screen::HEIGHT, GetColor(0, 0, 0), TRUE);
+    DrawBox(Screen::WIDTH - 16, 0, Screen::WIDTH, Screen::HEIGHT, GetColor(0, 0, 0), TRUE);
+    DrawFormatString(
+        20, 220,
+        GetColor(255, 255, 255),
+        "SoundState=%d",
+        CheckSoundMem(bgmHandle)
+    );
 }
 
 // ------------------------------

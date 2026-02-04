@@ -54,6 +54,7 @@ private:
 	// ‰æ‘œE‰¹
 	// „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ
 	int hBgImage;
+	int bgHandle;
 	int bgmHandle;
 	int hToothImage;
 	int ReversehToothImage;

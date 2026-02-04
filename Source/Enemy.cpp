@@ -184,28 +184,28 @@ void Enemy::Draw()
 {
     if (isDead_) return;
 
-   /* Object2D::Draw();
+    int halfW = drawSize.x / 2;
+    int halfH = drawSize.y / 2;
 
-    DrawBox(position.x - 24, position.y - 32,
-        position.x + 24, position.y + 32,
-        GetColor(0, 0, 255), FALSE);*/
-  /*  DrawRectGraph(
-        position.x-32,
-        position.y-32,
-        anim * 64,
-        animY * 64,
-        64, 64,
-        hImage,
-        TRUE
-    );*/
-    DrawExtendGraph(
-        position.x - drawSize.x / 2,
-        position.y - drawSize.y / 2,
-        position.x + drawSize.x / 2,
-        position.y + drawSize.y / 2,
-        hImage,
-        TRUE
-    );
+    int left, right;
+
+    if (dir == 1)
+    {
+        // 右向き（通常）
+        left = (int)position.x + halfW;
+        right = (int)position.x - halfW;
+    }
+    else
+    {
+        // 左向き（反転）
+        left = (int)position.x - halfW;
+        right = (int)position.x + halfW;
+    }
+
+    int top = (int)position.y - halfH;
+    int bottom = (int)position.y + halfH;
+
+    DrawExtendGraph(left, top, right, bottom, hImage, TRUE);
 
     DrawUI();
 }
@@ -227,7 +227,7 @@ void Enemy::DrawUI()
     DrawBox(x, y, x + curW, y + h,
         GetColor(255, 0, 0), TRUE);
 
-    DrawFormatString(x, y + 24, GetColor(255, 255, 255),
+    DrawFormatString(x, y - 16, GetColor(255, 255, 255),
         "ENEMY %d / %d", hp, maxHp);
 }
 
