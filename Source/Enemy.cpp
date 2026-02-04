@@ -227,7 +227,7 @@ void Enemy::DrawUI()
     DrawBox(x, y, x + curW, y + h,
         GetColor(255, 0, 0), TRUE);
 
-    DrawFormatString(x, y - 16, GetColor(255, 255, 255),
+    DrawFormatString(x, y - 16, GetColor(0, 0, 0),
         "ENEMY %d / %d", hp, maxHp);
 }
 

@@ -219,12 +219,7 @@ void Stage::Draw()
     // 左右に黒フェード
     DrawBox(0, 0, 16, Screen::HEIGHT, GetColor(0, 0, 0), TRUE);
     DrawBox(Screen::WIDTH - 16, 0, Screen::WIDTH, Screen::HEIGHT, GetColor(0, 0, 0), TRUE);
-    DrawFormatString(
-        20, 220,
-        GetColor(255, 255, 255),
-        "SoundState=%d",
-        CheckSoundMem(bgmHandle)
-    );
+    
 }
 
 // ------------------------------
