@@ -40,7 +40,7 @@ Enemy::Enemy(VECTOR2 pos)
 
 
     
-    //Die = LoadSoundMem("Sound/メニューを開く3.mp3");
+    
 }
 
 Enemy::~Enemy()
@@ -62,12 +62,12 @@ void Enemy::Update()
         return;
     }
 
-    // ===== プレイヤー方向を見る =====
+    // プレイヤー方向を見る
     if (pl)
     {
         float dx = pl->GetPosition().x - position.x;
 
-        const float FACE_THRESHOLD = 12.0f; // ★重要
+        const float FACE_THRESHOLD = 12.0f; //重要
 
         if (dx > FACE_THRESHOLD)
         {
@@ -79,13 +79,13 @@ void Enemy::Update()
             dir = -1;
             animY = 1;   // 左向き
         }
-        // ★それ以外（ほぼ同じx）は向きを固定
+        //それ以外（ほぼ同じx）は向きを固定
     }
 
-    // ===== 横移動 =====
+    // 横移動
     position.x += moveSpeed * dir;
 
-    // ===== ステージ端で止める =====
+    // ステージ端で止める
     const int HALF = 32;
 
     int leftLimit = HALF;
@@ -96,7 +96,7 @@ void Enemy::Update()
     else if (position.x > rightLimit)
         position.x = rightLimit;
 
-    // ===== ランダムジャンプ =====
+    // ランダムジャンプ
     if (jumpTimer > 0)
         jumpTimer--;
 
@@ -107,7 +107,7 @@ void Enemy::Update()
         jumpTimer = 60 + GetRand(120);
     }
 
-    // ===== 壁前ジャンプ =====
+    // 壁前ジャンプ
     int frontX = position.x + dir * HALF;
     int frontY = position.y;
 
@@ -120,12 +120,12 @@ void Enemy::Update()
         onGround = false;
     }
 
-    // ===== 重力 =====
+    // 重力
     position.y += velocityY;
     velocityY += Gravity;
     onGround = false;
 
-    const int BODY_HALF_Y = 24; // 32 → 24 に
+    const int BODY_HALF_Y = 24; 
 
     if (st->IsBlock(position.x, position.y + BODY_HALF_Y))
     {
@@ -138,16 +138,16 @@ void Enemy::Update()
 
 
 
-    // ===== タイマー =====
+    // タイマー
     if (damageTimer > 0) damageTimer--;
     if (attackTimer > 0) attackTimer--;
 
 
-    // ===== 弾発射タイマー =====
+    // 弾発射タイマー
     if (shotTimer > 0)
         shotTimer--;
 
-    // ===== 弾を撃つ =====
+    // 弾を撃つ
     if (shotTimer == 0 && pl)
     {
         // プレイヤーとの距離チェック（撃ちすぎ防止）
@@ -161,13 +161,13 @@ void Enemy::Update()
             bulletPos.y -= 10;          // 口あたり
             bulletPos.x += dir * 30;    // 体の前
 
-            Bullet* b = new Bullet(bulletPos,dir); // ★敵の弾
+            Bullet* b = new Bullet(bulletPos,dir); //敵の弾
             b->isEnemyBullet = true;
             shotTimer = 90; // 1.5秒に1発（60fps想定）
         }
     }
 
-    //// ===== 攻撃 =====
+    //// 攻撃
     //if (attackTimer == 0 && pl)
     //{
     //    VECTOR2 p = pl->GetPosition();

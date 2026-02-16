@@ -13,4 +13,6 @@ public:
 private:
     int titleFont;
     int infoFont;
+    int frame;
+    int titleFontBig;
 };

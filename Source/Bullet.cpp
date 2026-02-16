@@ -48,7 +48,7 @@ void Bullet::Update()
         }
     }
 
-    // ===== 敵弾 → プレイヤーに当たる =====
+    // 敵弾 → プレイヤーに当たる
     if (isEnemyBullet)
     {
         Player* pl = FindGameObject<Player>();

@@ -38,7 +38,7 @@ Player::Player(VECTOR2 pos)
     position = pos;
     velocityY = 0.0f;
     attackTimer = 0;
-    shotTimer = 0;          // ★追加
+    shotTimer = 0;          // 追加
     maxHp = 10;
     hp = 10;
 
@@ -74,9 +74,9 @@ void Player::Update()
     //Stage* st = FindGameObject<Stage>();
     if (!st) return;
 
-    // --- 横移動 ---
+    // 横移動
     if (CheckHitKey(KEY_INPUT_D)) {
-        dir = 1; // ★向き更新
+        dir = 1; // 向き更新
         animY = 3;
         position.x += moveSpeed;
         int push = st->CheckRight(position + VECTOR2(24, -31));
@@ -85,8 +85,8 @@ void Player::Update()
         position.x -= push;
     }
     if (CheckHitKey(KEY_INPUT_A)) {
-        dir = -1;                // ★向き更新
-        animY = 1;               // ★左向き行
+        dir = -1;                //向き更新
+        animY = 1;               //左向き行
         position.x -= moveSpeed;
 
         int push = st->CheckLeft(position + VECTOR2(-24, -31));
@@ -96,7 +96,7 @@ void Player::Update()
     }
 
 
-    // ===== ステージ端制限 =====
+    // ステージ端制限
     const int HALF = 24;
     int leftLimit = HALF;
     int rightLimit = st->GetMapWidth() - HALF;
@@ -106,7 +106,7 @@ void Player::Update()
     else if (position.x > rightLimit)
         position.x = rightLimit;
 
-    // --- ジャンプ ---
+    // ジャンプ 
     if (onGround) {
         if (CheckHitKey(KEY_INPUT_SPACE)) {
             if (!prevPushed) {
@@ -119,7 +119,7 @@ void Player::Update()
         }
     }
 
-    // --- 重力 ---
+    // 重力
     position.y += velocityY;
     velocityY += Gravity;
     onGround = false;
@@ -151,12 +151,12 @@ void Player::Update()
         }
     }
 
-    // --- ダメージ無敵 ---
+    // ダメージ無敵
     if (damageTimer > 0)
         damageTimer--;
 
-    // --- 近接攻撃 ---
-    bool nowAttack = CheckHitKey(KEY_INPUT_H);
+    // 近接攻撃
+    /*bool nowAttack = CheckHitKey(KEY_INPUT_H);
 
     if (nowAttack && !prevAttack && attackTimer == 0)
     {
@@ -171,14 +171,14 @@ void Player::Update()
                 attackTimer = 30;
             }
         }
-    }
+    }*/
 
-    prevAttack = nowAttack;
+    //prevAttack = nowAttack;
 
     if (attackTimer > 0)
         attackTimer--;
 
-    // --- 弾発射 ★追加 ---
+    // Jキーで弾発射 
     if (shotTimer > 0)
         shotTimer--;
 
@@ -190,7 +190,7 @@ void Player::Update()
 
         new Bullet(bulletPos, dir);
 
-        ammo--;              // ★弾を消費
+        ammo--;              // 弾を消費
         shotTimer = 20;
     }
 
@@ -208,7 +208,7 @@ void Player::Update()
         reloadTimer = 0;
     }
 
-    // --- Enemy 押し出し ---
+    //  Enemy 押し出し
     Enemy* enemy = FindGameObject<Enemy>();
     if (enemy && !enemy->isDead())
     {
