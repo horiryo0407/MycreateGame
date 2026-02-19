@@ -182,7 +182,7 @@ void Player::Update()
     if (shotTimer > 0)
         shotTimer--;
 
-    if (CheckHitKey(KEY_INPUT_J) && shotTimer == 0 && ammo > 0)
+    if (CheckHitKey(KEY_INPUT_B) && shotTimer == 0 && ammo > 0)
     {
         VECTOR2 bulletPos = position;
         bulletPos.x += dir * 30;
@@ -212,24 +212,34 @@ void Player::Update()
     Enemy* enemy = FindGameObject<Enemy>();
     if (enemy && !enemy->isDead())
     {
+        const float PX = 24.0f;   // Player半幅
+        const float PY = 32.0f;   // Player半高
+        const float EX = 24.0f;   // Enemy半幅
+        const float EY = 32.0f;   // Enemy半高
+
         VECTOR2 epos = enemy->GetPosition();
+
         float dx = position.x - epos.x;
         float dy = position.y - epos.y;
 
-        if (fabs(dx) < 48 && fabs(dy) < 40)
-        {
-            float push = 48 - fabs(dx);
-            if (dx > 0)
-                position.x += push;
-            else
-                position.x -= push;
+        float overlapX = (PX + EX) - fabs(dx);
+        float overlapY = (PY + EY) - fabs(dy);
 
-            if (position.x < leftLimit)
-                position.x = leftLimit;
-            else if (position.x > rightLimit)
-                position.x = rightLimit;
+        if (overlapX > 0 && overlapY > 0)
+        {
+            // 常に横方向へ分離（敵は床扱いしない）
+            if (dx > 0)
+                position.x += overlapX;
+            else
+                position.x -= overlapX;
+
+            // 少し跳ねさせる（乗れないように）
+            if (velocityY > 0)
+                velocityY = -2.0f;
         }
     }
+
+
 }
 
 void Player::Draw()

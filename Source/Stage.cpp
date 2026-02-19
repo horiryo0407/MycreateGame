@@ -33,7 +33,7 @@ static void DrawFightBackground()
 Stage::Stage()
 {
 	bgHandle = LoadSoundMem("data/image/harap.mp3");
-	int volume = 256;
+	int volume = 128;
 	assert(bgHandle != -1);
 
 	CsvReader* csv = new CsvReader("data/map/stage0.csv");
@@ -124,13 +124,13 @@ void Stage::Update()
 		}
 	}
 
-	Enemy* en = FindGameObject<Enemy>();
+	/*Enemy* en = FindGameObject<Enemy>();
 	if (en && !en->isDead()) {
 		float headY = en->GetPosition().y - 32;
 		if (headY <= ceilingY + imageSize.y) {
 			en->Kill();
 		}
-	}
+	}*/
 }
 
 void Stage::Draw()
