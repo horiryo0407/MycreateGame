@@ -297,7 +297,7 @@ void Player::DrawUI()
         GetColor(255, 0, 0), TRUE);
 
     DrawFormatString(x, y - 16, GetColor(0, 0, 0),
-        "PLAYER HP %d / %d", hp, maxHp);
+        "PLAYER HP %d / %d　Bで弾発射", hp, maxHp);
 
     int ax = 20;
     int ay = 60;

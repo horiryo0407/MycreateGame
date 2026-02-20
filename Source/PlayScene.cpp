@@ -21,21 +21,21 @@ void PlayScene::Update()
     Player* player = FindGameObject<Player>();
     Enemy* enemy = FindGameObject<Enemy>();
 
-    // ===== Player死亡 → GAMEOVER =====
+    //  Player死亡 → GAMEOVER
     if (player && player->isDead())
     {
         SceneManager::ChangeScene("GAMEOVER");
         return;
     }
 
-    // ===== Enemy死亡 → CLEAR =====
+    // Enemy死亡 → CLEAR
     if (enemy && enemy->isDead())
     {
         SceneManager::ChangeScene("CLEAR");
         return;
     }
 
-    // ===== デバッグ用 =====
+    //  デバッグ用
     if (CheckHitKey(KEY_INPUT_T))
     {
         SceneManager::ChangeScene("TITLE");
